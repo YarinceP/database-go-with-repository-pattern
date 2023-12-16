@@ -1,0 +1,5 @@
+{
+  "database": {
+    "connectionString": "root:@tcp(localhost:3306)/db_lib_go?parseTime=true"
+  }
+}
