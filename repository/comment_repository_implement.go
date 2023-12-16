@@ -13,8 +13,21 @@ type commentRepositoryImplementation struct {
 }
 
 func NewCommentRepository(db *sql.DB) CommentRepository {
+	// Validar que el parámetro db no sea nulo
+	if db == nil {
+		panic("Error creating CommentRepository: provided database connection is nil. Please ensure a valid database connection is provided.")
+	}
+
+	// Validar la conexión a la base de datos
+	err := db.Ping()
+	if err != nil {
+		panic("Error creating CommentRepository: unable to connect to the database. Please check your database connection settings and ensure the database server is running.")
+	}
+
+	// Crear la instancia del repositorio
 	return &commentRepositoryImplementation{DB: db}
 }
+
 func (repository commentRepositoryImplementation) Insert(ctx context.Context, comment entity.Comment) (entity.Comment, error) {
 	script := "INSERT INTO comments(email, comment) VALUES(?,?)"
 	result, err := repository.DB.ExecContext(ctx, script, comment.Email, comment.Comment)
