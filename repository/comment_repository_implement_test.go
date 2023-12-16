@@ -10,7 +10,11 @@ import (
 )
 
 func TestInsertComment(t *testing.T) {
-	commentRepository := NewCommentRepository(db.GetConnection())
+	connection, err := db.GetConnection()
+	if err != nil {
+		return
+	}
+	commentRepository := NewCommentRepository(connection)
 
 	ctx := context.Background()
 	comment := entity.Comment{
@@ -26,7 +30,11 @@ func TestInsertComment(t *testing.T) {
 }
 
 func TestFindByIdComment(t *testing.T) {
-	commentRepository := NewCommentRepository(db.GetConnection())
+	connection, err := db.GetConnection()
+	if err != nil {
+		return
+	}
+	commentRepository := NewCommentRepository(connection)
 
 	ctx := context.Background()
 
@@ -39,7 +47,11 @@ func TestFindByIdComment(t *testing.T) {
 }
 
 func TestFindAllComment(t *testing.T) {
-	commentRepository := NewCommentRepository(db.GetConnection())
+	connection, err := db.GetConnection()
+	if err != nil {
+		return
+	}
+	commentRepository := NewCommentRepository(connection)
 
 	ctx := context.Background()
 
