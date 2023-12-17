@@ -13,13 +13,17 @@ var err error
 var RequestedId int32 = 1
 
 func main() {
-	Connection, err = database.GetConnection()
+	connector, err := database.NewConnectorWithConnectionString()
+	if err != nil {
+		panic(err)
+	}
+	Connection, err = database.GetConnection(connector)
 	if err != nil {
 		log.Println("Error acquiring the database connection:", err)
 	}
 
 	defer func() {
-		err := database.CloseConnection()
+		err := database.CloseConnection(connector)
 		if err != nil {
 			log.Println("Error closing the database connection:", err)
 		}

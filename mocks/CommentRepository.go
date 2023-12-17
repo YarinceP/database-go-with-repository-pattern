@@ -67,27 +67,17 @@ func (_m *CommentRepository) FindByID(ctx context.Context, id int32) (*entity.Co
 }
 
 // Insert provides a mock function with given fields: ctx, comment
-func (_m *CommentRepository) Insert(ctx context.Context, comment entity.Comment) (entity.Comment, error) {
+func (_m *CommentRepository) Insert(ctx context.Context, comment entity.Comment) error {
 	ret := _m.Called(ctx, comment)
 
-	var r0 entity.Comment
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, entity.Comment) (entity.Comment, error)); ok {
-		return rf(ctx, comment)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, entity.Comment) entity.Comment); ok {
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, entity.Comment) error); ok {
 		r0 = rf(ctx, comment)
 	} else {
-		r0 = ret.Get(0).(entity.Comment)
+		r0 = ret.Error(0)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, entity.Comment) error); ok {
-		r1 = rf(ctx, comment)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
+	return r0
 }
 
 // NewCommentRepository creates a new instance of CommentRepository. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.

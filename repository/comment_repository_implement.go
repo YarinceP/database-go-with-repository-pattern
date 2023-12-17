@@ -2,9 +2,12 @@ package repository
 
 import (
 	"context"
+	"database-go-with-repository-pattern/database"
 	"database-go-with-repository-pattern/entity"
 	"database/sql"
 	"errors"
+	"fmt"
+	"log"
 	"strconv"
 )
 
@@ -28,22 +31,39 @@ func NewCommentRepository(db *sql.DB) CommentRepository {
 	return &commentRepositoryImplementation{DB: db}
 }
 
-func (repository commentRepositoryImplementation) Insert(ctx context.Context, comment entity.Comment) (entity.Comment, error) {
-	script := "INSERT INTO comments(email, comment) VALUES(?,?)"
-	result, err := repository.DB.ExecContext(ctx, script, comment.Email, comment.Comment)
-	if err != nil {
-		return comment, err
+func (repository *commentRepositoryImplementation) Insert(ctx context.Context, comment entity.Comment) error {
+	query := CommentQueries.Insert
+
+	// Ensure that the SQL query is not empty
+	if err := database.EnsureNonEmptyQuery(query); err != nil {
+		return fmt.Errorf("failed to execute SQL query: %v", err)
 	}
 
-	lastId, err := result.LastInsertId()
+	// Log the SQL query before executing
+	log.Printf("Executing SQL query: %s", query)
+
+	// Execute the SQL query
+	result, err := repository.DB.ExecContext(ctx, query, comment.Email, comment.Comment)
 	if err != nil {
-		return comment, err
+		return fmt.Errorf("failed to execute SQL query: %v", err)
 	}
-	comment.Id = int32(lastId)
-	return comment, nil
+
+	// Check the number of affected rows
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get the number of affected rows: %v", err)
+	}
+	if rowsAffected == 0 {
+		return errors.New("no rows were affected by the SQL query")
+	}
+
+	// Log the success of the operation
+	log.Printf("Comment inserted successfully: %s", comment.Comment)
+
+	return nil
 }
 
-func (repository commentRepositoryImplementation) FindByID(ctx context.Context, id int32) (*entity.Comment, error) {
+func (repository *commentRepositoryImplementation) FindByID(ctx context.Context, id int32) (*entity.Comment, error) {
 	script := "SELECT id, email, comment FROM comments WHERE id = ? LIMIT 1"
 	result, err := repository.DB.QueryContext(ctx, script, id)
 	comment := entity.Comment{}
@@ -69,7 +89,7 @@ func (repository commentRepositoryImplementation) FindByID(ctx context.Context, 
 	}
 }
 
-func (repository commentRepositoryImplementation) FindAll(ctx context.Context) ([]entity.Comment, error) {
+func (repository *commentRepositoryImplementation) FindAll(ctx context.Context) ([]entity.Comment, error) {
 	script := "SELECT id, email, comment FROM comments"
 	result, err := repository.DB.QueryContext(ctx, script)
 	if err != nil {
